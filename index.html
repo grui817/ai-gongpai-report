@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI工牌使用工具</title>
+  <style>
+    :root {
+      --primary: #1a6ef5;
+      --primary-light: #e8f0fe;
+      --accent: #ff6b35;
+      --success: #27ae60;
+      --warning: #f39c12;
+      --danger: #e74c3c;
+      --purple: #7c3aed;
+      --bg: #f5f7fa;
+      --card: #ffffff;
+      --text: #2c3e50;
+      --sub: #7f8c8d;
+      --border: #e0e6ed;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ── 顶部 banner（极简） ── */
+    .banner {
+      background: linear-gradient(135deg, #1a6ef5 0%, #0a3d8f 100%);
+      color: white;
+      padding: 18px 32px;
+      position: relative;
+      text-align: center;
+    }
+    .banner h1 { 
+      font-size: 20px; 
+      font-weight: 700; 
+      letter-spacing: 0.5px;
+    }
+
+    /* ── 分页导航 ── */
+    .page-nav {
+      display: flex;
+      justify-content: center;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .page-tab {
+      padding: 14px 28px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--sub);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+    }
+    .page-tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      background: var(--primary-light);
+    }
+    .page-tab:hover:not(.active) {
+      color: var(--text);
+      background: #f8f9fa;
+    }
+
+    /* ── 页面容器 ── */
+    .page-container {
+      display: none;
+      padding: 24px 20px 40px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .page-container.active {
+      display: block;
+    }
+
+    /* ── 目标横幅（极简） ── */
+    .goal-banner {
+      background: linear-gradient(135deg, #ff6b35 0%, #e84d1c 100%);
+      color: white;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    .goal-banner h2 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .goal-banner p {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    /* ── 章节标题 ── */
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 18px;
+      font-weight: 700;
+      margin: 32px 0 16px;
+      color: var(--primary);
+    }
+    .section-title .icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: var(--primary-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    /* ── 5分钟快速管理卡片 ── */
+    .quick-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .quick-card {
+      background: var(--card);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 20px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .quick-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+    }
+    .quick-card .quick-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .quick-card .quick-num {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .quick-card h4 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .quick-card p {
+      font-size: 13px;
+      color: var(--sub);
+      margin-bottom: 12px;
+    }
+    .quick-card .action {
+      background: #f8f9fa;
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-size: 12.5px;
+      border-left: 3px solid var(--accent);
+    }
+    .quick-card .result {
+      font-size: 12px;
+      color: #27ae60;
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* ── 业务部昨日数据表格 ── */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      background: var(--card);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      margin-bottom: 32px;
+    }
+    .data-table th {
+      background: #f0f4ff;
+      color: var(--primary);
+      padding: 12px 16px;
+      text-align: center;
+      font-weight: 700;
+      border-bottom: 2px solid var(--border);
+    }
+    .data-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      text-align: center;
+    }
+    .data-table tr:last-child td {
+      border-bottom: none;
+    }
+    .data-table .city-name {
+      font-weight: 600;
+      color: var(--text);
+      text-align: left;
+    }
+    .data-table .status {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .status-good { background: #e8f5e9; color: #27ae60; }
+    .status-warning { background: #fff8e1; color: #f39c12; }
+    .status-bad { background: #fce4ec; color: #e74c3c; }
+    .status-unknown { background: #f8f9fa; color: #7f8c8d; border: 1px dashed #bdc3c7; }
+    
+    .data-table .trend {
+      font-size: 11px;
+      margin-left: 4px;
+    }
+    .trend-up { color: #e74c3c; }
+    .trend-down { color: #27ae60; }
+    .trend-bad { color: #e74c3c; font-weight: 600; }
+    .trend-warning { color: #f39c12; font-weight: 600; }
+
+    /* ── 核心三连问卡片 ── */
+    .three-questions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .question-card {
+      background: var(--card);
+      border-radius: 10px;
+      padding: 20px;
+      border-top: 4px solid #1a6ef5;
+    }
+    .question-card:nth-child(2) {
+      border-top-color: #ff6b35;
+    }
+    .question-card:nth-child(3) {
+      border-top-color: #27ae60;
+    }
+    .question-card .q-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #1a6ef5;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .question-card:nth-child(2) .q-num {
+      background: #ff6b35;
+    }
+    .question-card:nth-child(3) .q-num {
+      background: #27ae60;
+    }
+    .question-card h5 {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .question-card p {
+      font-size: 13px;
+      color: var(--sub);
+    }
+    .question-card .answer {
+      background: #f8f9fa;
+      border-radius: 6px;
+      padding: 10px 12px;
+      margin-top: 10px;
+      font-size: 12.5px;
+      color: var(--text);
+    }
+
+    /* ── 原因诊断与解决方案卡片 ── */
+    .diagnosis-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .diagnosis-card {
+      background: var(--card);
+      border-radius: 10px;
+      padding: 20px;
+      border: 1px solid var(--border);
+    }
+    .diagnosis-card h4 {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--primary);
+    }
+    .diagnosis-card .problem {
+      font-size: 12.5px;
+      color: var(--danger);
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+    .diagnosis-card .solution {
+      font-size: 12.5px;
+      color: var(--success);
+      margin-top: 8px;
+      font-weight: 600;
+    }
+    .diagnosis-card .detail {
+      font-size: 12px;
+      color: var(--sub);
+      margin: 6px 0;
+      line-height: 1.5;
+    }
+
+    /* ── 正则表达式交互工具 ── */
+    .regex-tool {
+      background: var(--card);
+      border-radius: 10px;
+      padding: 24px;
+      border: 2px solid #7c3aed;
+      margin-bottom: 24px;
+    }
+    .regex-tool h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #7c3aed;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .tool-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .tool-input {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .tool-input label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .tool-input textarea, .tool-input input {
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 13px;
+      resize: vertical;
+    }
+    .tool-input textarea:focus, .tool-input input:focus {
+      outline: none;
+      border-color: #7c3aed;
+      box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.1);
+    }
+    .tool-btn {
+      background: #7c3aed;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 8px;
+    }
+    .tool-btn:hover {
+      background: #6d28d9;
+    }
+    .tool-output {
+      background: #f9fafb;
+      border-radius: 8px;
+      padding: 16px;
+      border: 1px solid #e5e7eb;
+    }
+    .tool-output h4 {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #7c3aed;
+    }
+    .regex-result {
+      background: #f0f4ff;
+      border-radius: 6px;
+      padding: 12px;
+      font-family: monospace;
+      font-size: 13px;
+      color: #1a6ef5;
+      margin-bottom: 10px;
+      overflow-x: auto;
+    }
+    .regex-explain {
+      font-size: 12px;
+      color: var(--sub);
+      line-height: 1.5;
+    }
+
+    /* ── 三类模型对比 ── */
+    .model-comparison {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .model-card {
+      background: var(--card);
+      border-radius: 10px;
+      padding: 20px;
+      border: 1px solid var(--border);
+    }
+    .model-card.sales {
+      border-top: 4px solid #1a6ef5;
+    }
+    .model-card.need {
+      border-top: 4px solid #ff6b35;
+    }
+    .model-card.risk {
+      border-top: 4px solid #7c3aed;
+    }
+    .model-card h4 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .model-card p {
+      font-size: 13px;
+      color: var(--sub);
+      margin-bottom: 12px;
+    }
+    .model-card .focus-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .model-card .focus-list li {
+      font-size: 12.5px;
+      color: #4a5568;
+      padding: 4px 0;
+      position: relative;
+      padding-left: 16px;
+    }
+    .model-card .focus-list li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: #ff6b35;
+      font-weight: bold;
+    }
+
+    /* ── 提示框 ── */
+    .alert {
+      padding: 14px 18px;
+      border-radius: 8px;
+      margin-bottom: 18px;
+      font-size: 13px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .alert-warning {
+      background: #fff8e1;
+      border-left: 4px solid #ffc107;
+      color: #5d4037;
+    }
+    .alert-info {
+      background: #e3f2fd;
+      border-left: 4px solid #1a6ef5;
+      color: #1a237e;
+    }
+    .alert-success {
+      background: #e8f5e9;
+      border-left: 4px solid #27ae60;
+      color: #1b5e20;
+    }
+    .alert-purple {
+      background: #f3e8ff;
+      border-left: 4px solid #7c3aed;
+      color: #4527a0;
+    }
+    .alert-icon {
+      font-size: 16px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* ── AI工牌价值卡片 ── */
+    .value-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .value-card {
+      background: var(--card);
+      border-radius: 10px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+    .value-card .value-icon {
+      font-size: 24px;
+      margin-bottom: 12px;
+      color: var(--primary);
+    }
+    .value-card h4 {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .value-card p {
+      font-size: 12.5px;
+      color: var(--sub);
+      line-height: 1.5;
+    }
+
+    /* ── 长租公寓 vs 房地产开发对比表 ── */
+    .industry-comparison {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+      background: var(--card);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      margin-bottom: 24px;
+    }
+    .industry-comparison th {
+      background: #f5f3ff;
+      color: #7c3aed;
+      padding: 10px 12px;
+      text-align: left;
+      font-weight: 700;
+      border-bottom: 2px solid var(--border);
+    }
+    .industry-comparison td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .industry-comparison tr:last-child td {
+      border-bottom: none;
+    }
+    .industry-comparison .dimension {
+      font-weight: 600;
+      color: var(--text);
+      width: 20%;
+    }
+
+    /* ── 响应式 ── */
+    @media (max-width: 768px) {
+      .banner { padding: 16px 20px; }
+      .page-tab { padding: 12px 20px; font-size: 13px; }
+      .page-container { padding: 20px 16px 32px; }
+      .quick-grid, .three-questions, .tool-grid, .model-comparison,
+      .diagnosis-grid, .value-cards {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ───────────────────── BANNER（极简） ───────────────────── -->
+<div class="banner">
+  <h1>AI工牌使用工具</h1>
+</div>
+
+<!-- ───────────────────── 分页导航 ───────────────────── -->
+<div class="page-nav">
+  <div class="page-tab active" data-page="page1">初阶管理（录音关联率100%）</div>
+  <div class="page-tab" data-page="page2">高阶管理（模型调改）</div>
+</div>
+
+<!-- ───────────────────── 第一页：初阶管理（每日5分钟） ───────────────────── -->
+<div id="page1" class="page-container active">
+
+  <!-- 核心目标 -->
+  <div class="goal-banner">
+    <h2>推广期核心目标：录音关联率 100%</h2>
+    <p>矫正管家使用习惯，每日5分钟快速完成管理闭环</p>
+  </div>
+
+  <!-- 第一章节：业务部昨日数据 -->
+  <div class="section-title">
+    <div class="icon">📊</div>
+    一、业务部近7日数据
+  </div>
+
+  <p style="font-size:13.5px;color:var(--sub);margin-bottom:16px;">
+    深圳、北京、上海、江浙、成都五个城市，按近7日录音关联率排名。关联率 = 已关联录音数 ÷ 来访数 × 100%。
+  </p>
+
+                                                                                                                                        <table class="data-table">
+    <thead>
+      <tr>
+        <th>城市</th>
+        <th>访客</th>
+        <th>录制</th>
+        <th>占比</th>
+        <th>排名</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="city-name">北京</td>
+        <td>18</td>
+        <td>18</td>
+        <td><span class="status status-good">100.0%</span></td>
+        <td><strong>第1名</strong></td>
+      </tr>
+      <tr>
+        <td class="city-name">成都</td>
+        <td>37</td>
+        <td>33</td>
+        <td><span class="status status-good">89.2%</span></td>
+        <td><strong>第2名</strong></td>
+      </tr>
+      <tr>
+        <td class="city-name">深圳</td>
+        <td>48</td>
+        <td>40</td>
+        <td><span class="status status-good">83.3%</span></td>
+        <td><strong>第3名</strong></td>
+      </tr>
+      <tr>
+        <td class="city-name">南京</td>
+        <td>88</td>
+        <td>67</td>
+        <td><span class="status status-warning">76.1%</span></td>
+        <td><strong>第4名</strong></td>
+      </tr>
+      <tr>
+        <td class="city-name">上海</td>
+        <td>32</td>
+        <td>23</td>
+        <td><span class="status status-warning">71.9%</span></td>
+        <td><strong>第5名</strong></td>
+      </tr>
+      <tr style="background:#f8f9fa; font-weight:600;">
+        <td class="city-name">合计</td>
+        <td>223</td>
+        <td>181</td>
+        <td><span class="status status-good">81.2%</span></td>
+        <td>-</td>
+      </tr>
+    </tbody>
+  </table>
+
+                                                                                                                                                                          <div class="alert alert-success" style="background:#e8f5e9;border-left:4px solid #4caf50;color:#2e7d32;">
+    <span class="alert-icon">&#x2705;</span>
+    <div>
+      <strong>数据更新成功！</strong><br>
+      更新时间: 2026-05-12 19:48<br>
+      数据周期：近7日<br>
+      整体关联率：81.2%（目标100%）<br>
+      说明：数据来自爬虫自动抓取，经人工核对确认准确
+    </div>
+  </div>
+  </div>
+  </div>
+  </div>
+  </div>
+
+
+
+  <!-- 第二章节：快速管理 -->
+  <div class="section-title">
+    <div class="icon">⚡</div>
+    二、快速管理
+  </div>
+
+  <!-- 第一步：识别未关联来访 -->
+  <div class="quick-card" style="margin-bottom:24px;">
+    <div class="quick-header">
+      <div class="quick-num">1</div>
+      <div>
+        <h4>识别未关联来访</h4>
+        <p>30秒定位待关联的来访单</p>
+      </div>
+    </div>
+    <div class="action">
+      <strong>操作路径：</strong>左侧菜单选择「客户中心」→ 点击「来访客户」→ 点击「去关联」查看待关联来访单列表
+    </div>
+  </div>
+
+  <!-- 第二步：执行核心三连问 -->
+  <div class="quick-card" style="margin-bottom:24px;">
+    <div class="quick-header">
+      <div class="quick-num">2</div>
+      <div>
+        <h4>执行核心三连问</h4>
+        <p>2分钟电话或企微沟通，探究原因并制定解决方案</p>
+      </div>
+    </div>
+    <div class="action">
+      <strong>操作路径：</strong>联系管家 → 了解未关联的原因 → 记录原因并确认解决方案
+    </div>
+  </div>
+
+  <!-- 第三步：关闭当日问题 -->
+  <div class="quick-card" style="margin-bottom:24px;">
+    <div class="quick-header">
+      <div class="quick-num">3</div>
+      <div>
+        <h4>关闭当日问题</h4>
+        <p>协助解决，确保今日关联率100%</p>
+      </div>
+    </div>
+    <div class="action">
+      <strong>操作路径：</strong>协助关联录音 → 确认系统显示正常 → 检查今日新增来访状态
+    </div>
+  </div>
+
+  <!-- 第三章节：核心三连问详解 -->
+  <div class="section-title">
+    <div class="icon">🔍</div>
+    三、核心三连问（定位原因与解决方案）
+  </div>
+
+  <p style="font-size:13.5px;color:var(--sub);margin-bottom:16px;">
+    未关联录音通常由以下三类原因导致，针对不同原因采取相应解决方案，确保同类问题不再发生。
+  </p>
+
+  <div class="diagnosis-grid">
+    
+    <div class="diagnosis-card">
+      <h4>原因一：系统映射问题</h4>
+      <div class="problem">扫来访码与AI工牌不匹配</div>
+      <div class="detail">
+        <strong>具体表现：</strong><br>
+        • 管家A离职，新管家B使用A的工牌<br>
+        • 管家更换项目，工牌映射未更新<br>
+        • 临时借用工牌，未登记关联关系
+      </div>
+      <div class="solution">当日解决：联系总部更新系统映射关系，重新关联录音</div>
+      <div class="detail">
+        <strong>预防机制：</strong><br>
+        • 建立工牌使用登记表<br>
+        • 人员变动24小时内通知总部<br>
+        • 备用工牌做好标记
+      </div>
+    </div>
+
+    <div class="diagnosis-card">
+      <h4>原因二：操作习惯问题</h4>
+      <div class="problem">忘记佩戴/工牌没电</div>
+      <div class="detail">
+        <strong>具体表现：</strong><br>
+        • 出门急忘带工牌<br>
+        • 工牌没电无法使用<br>
+        • 操作流程不熟悉
+      </div>
+      <div class="solution">当日解决：补关联录音，培训正确操作流程</div>
+      <div class="detail">
+        <strong>预防机制：</strong><br>
+        • 设置手机提醒（上班打卡、带看后）<br>
+        • 晨会检查工牌电量和佩戴<br>
+        • 制作操作流程图贴桌面<br>
+        • 关注带看后客户白描与实际来访是否一致
+      </div>
+    </div>
+
+    <div class="diagnosis-card">
+      <h4>原因三：业务流程问题</h4>
+      <div class="problem">带看高峰忘记引导客户扫码</div>
+      <div class="detail">
+        <strong>具体表现：</strong><br>
+        • 集中带看，漏扫码<br>
+        • 客户不会操作扫码流程<br>
+        • 网络信号不好无法扫码<br>
+        • 客户手机没电/没带手机
+      </div>
+      <div class="solution">当日解决：RIS系统中新建来访，回到旺小宝关联录音（客户需登录过app/小程序）</div>
+      <div class="detail">
+        <strong>预防机制：</strong><br>
+        • 制作扫码流程卡片<br>
+        • 带看后检查客户画像及白描<br>
+        • 设立带看前后检查清单
+      </div>
+    </div>
+
+  </div>
+
+  <div class="alert alert-info" style="margin-bottom:24px;">
+    <span class="alert-icon">📌</span>
+    <div>
+      <strong>特殊情况处理：</strong>如来访属于竞品调研、中介踩盘等特殊情况，可将来访单标记为「特殊来访」，不计入关联率考核。
+    </div>
+  </div>
+
+  <!-- 原因诊断与解决方案 -->
+  <div class="section-title">
+    <div class="icon">🩺</div>
+    四、原因诊断与解决方案（常见问题库）
+  </div>
+
+  <div class="diagnosis-grid">
+    
+    <div class="diagnosis-card">
+      <h4>问题类型：系统映射问题</h4>
+      <div class="problem">扫来访码与AI工牌不匹配</div>
+      <div class="detail">
+        <strong>具体表现：</strong><br>
+        • 管家A离职，新管家B使用A的工牌<br>
+        • 管家更换项目，工牌映射未更新<br>
+        • 临时借用工牌，未登记关联关系
+      </div>
+      <div class="solution">当日解决：联系总部更新系统映射关系，重新关联录音</div>
+      <div class="detail">
+        <strong>预防机制：</strong><br>
+        • 建立工牌使用登记表<br>
+        • 人员变动24小时内通知总部<br>
+        • 备用工牌做好标记
+      </div>
+    </div>
+
+    <div class="diagnosis-card">
+      <h4>问题类型：操作习惯问题</h4>
+      <div class="problem">忘记佩戴/忘记上传工牌</div>
+      <div class="detail">
+        <strong>具体表现：</strong><br>
+        • 出门急忘带工牌<br>
+        • 工牌没电无法使用<br>
+        • 操作流程不熟悉
+      </div>
+      <div class="solution">当日解决：补关联录音，培训正确操作流程</div>
+      <div class="detail">
+        <strong>预防机制：</strong><br>
+        • 设置手机提醒（上班打卡、带看后）<br>
+        • 晨会检查工牌电量和佩戴<br>
+        • 制作操作流程图贴桌面<br>
+        • 关注带看后客户白描与实际来访是否一致
+      </div>
+    </div>
+
+    <div class="diagnosis-card">
+      <h4>问题类型：业务流程问题</h4>
+      <div class="problem">带看高峰忘记引导客户扫码</div>
+      <div class="detail">
+        <strong>具体表现：</strong><br>
+        • 集中带看，漏扫码<br>
+        • 客户不会操作扫码流程<br>
+        • 网络信号不好无法扫码<br>
+        • 客户手机没电/没带手机
+      </div>
+      <div class="solution">当日解决：补录来访单，后台补关联录音</div>
+      <div class="detail">
+        <strong>预防机制：</strong><br>
+        • 制作扫码流程卡片<br>
+        • 带看后检查客户画像及白描<br>
+        • 设立带看前后检查清单
+      </div>
+    </div>
+
+  </div>
+
+  <!-- AI工牌价值传递 -->
+  <div class="section-title">
+    <div class="icon">💡</div>
+    五、AI工牌价值传递（门店层面）
+  </div>
+
+  <p style="font-size:13.5px;color:var(--sub);margin-bottom:16px;">
+    AI工牌的核心价值不仅是"管使用"，而是帮助门店提升管理效率和带看质量。
+  </p>
+
+  <div class="value-cards">
+    
+    <div class="value-card">
+      <div class="value-icon">⏱️</div>
+      <h4>缩短盘客时间</h4>
+      <p>从回忆式盘客（耗时30分钟）到录音还原式盘客（耗时5分钟），节省85%盘客时间</p>
+    </div>
+
+    <div class="value-card">
+      <div class="value-icon">🎯</div>
+      <h4>避免回忆错乱</h4>
+      <p>录音真实还原带看过程，避免管家回忆偏差、客户信息混淆、带看细节遗漏</p>
+    </div>
+
+    <div class="value-card">
+      <div class="value-icon">📈</div>
+      <h4>提升带看质量</h4>
+      <p>AI分析带看执行率、客户意向、需求挖掘，针对性改进管家带看技能</p>
+    </div>
+
+    <div class="value-card">
+      <div class="value-icon">🔄</div>
+      <h4>建立标准流程</h4>
+      <p>基于AI数据分析，建立标准带看流程、话术模板、服务标准，提升服务质量</p>
+    </div>
+
+  </div>
+
+
+</div>
+
+<!-- ───────────────────── 第二页：高阶管理（模型调改） ───────────────────── -->
+<div id="page2" class="page-container">
+
+  <!-- 模型调改目标 -->
+  <div class="goal-banner" style="background:linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);">
+    <h2>高阶管理目标：模型准确性持续提升</h2>
+    <p>聚焦销讲模型和挖需模型调改，适应长租公寓出租业态</p>
+  </div>
+
+  <!-- 三类模型对比 -->
+  <div class="section-title">
+    <div class="icon">🔍</div>
+    一、三类模型对比（聚焦销讲与挖需）
+  </div>
+
+  <p style="font-size:13.5px;color:var(--sub);margin-bottom:16px;">
+    当前AI工牌的模型倾向房地产开发销售，需调整为长租公寓出租业态。
+  </p>
+
+  <div class="model-comparison">
+    
+    <div class="model-card sales">
+      <h4>🏠 销讲模型（重点调改）</h4>
+      <p>从"卖房话术"调整为"租房服务介绍"</p>
+      <ul class="focus-list">
+        <li><strong>原重点：</strong>升值潜力、投资回报</li>
+        <li><strong>新重点：</strong>生活便利、服务配套</li>
+        <li><strong>调整：</strong>添加租房相关关键词</li>
+        <li><strong>目标：</strong>执行率提升至85%+</li>
+      </ul>
+    </div>
+
+    <div class="model-card need">
+      <h4>🎯 挖需模型（重点调改）</h4>
+      <p>从"购房需求"调整为"租房痛点"</p>
+      <ul class="focus-list">
+        <li><strong>原重点：</strong>户型偏好、预算范围</li>
+        <li><strong>新重点：</strong>通勤时间、租期灵活</li>
+        <li><strong>调整：</strong>识别租房决策信号</li>
+        <li><strong>目标：</strong>意向判断准确率90%+</li>
+      </ul>
+    </div>
+
+    <div class="model-card risk">
+      <h4>⚠️ 风控模型（暂不动）</h4>
+      <p>保持现有规则，观察适应情况</p>
+      <ul class="focus-list">
+        <li><strong>当前状态：</strong>运行稳定</li>
+        <li><strong>调整策略：</strong>观察1个月</li>
+        <li><strong>关注点：</strong>误报率变化</li>
+        <li><strong>目标：</strong>误报率 ≤ 5%</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- 正则表达式交互工具 -->
+  <div class="section-title">
+    <div class="icon">🛠️</div>
+    二、正则表达式调改工具（引导管理者提取问题）
+  </div>
+
+  <p style="font-size:13.5px;color:var(--sub);margin-bottom:16px;">
+    输入具体问题，工具引导您提取核心问题，并自动生成正则表达式建议用于模型调改。
+  </p>
+
+  <div class="regex-tool">
+    <h3>🧠 正则表达式生成器</h3>
+    
+    <div class="tool-grid">
+      
+      <div class="tool-input">
+        <label for="problem">1. 描述您发现的AI分析偏差</label>
+        <textarea id="problem" rows="4" placeholder="例如：销售实际在讲'地铁口比较方便，上班只要20分钟'，这应该是销讲模型中的'交通便利'维度，但AI没识别出来"></textarea>
+        
+        <label for="actual-text">2. 管家实际使用的表达（可选）</label>
+        <input type="text" id="actual-text" placeholder="例如：地铁口、交通方便、上班近、通勤时间短">
+        
+        <label for="model-type">3. 选择要调改的模型类型</label>
+        <select id="model-type" style="padding:10px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
+          <option value="sales">销讲模型（执行率）</option>
+          <option value="need">挖需模型（意向判断）</option>
+        </select>
+        
+        <button class="tool-btn" onclick="generateRegex()">生成正则表达式建议</button>
+      </div>
+      
+      <div class="tool-output">
+        <h4>生成结果</h4>
+        <div id="regex-result" class="regex-result">等待输入问题描述...</div>
+        <div id="regex-explain" class="regex-explain">
+          <strong>说明：</strong>将生成的正则表达式复制到【运营中心 → 模型管理】对应维度进行测试。
+        </div>
+        
+        <h4 style="margin-top:20px;">使用示例</h4>
+        <div class="regex-result">/(地铁口|交通方便|上班近|通勤时间短)/</div>
+        <div class="regex-explain">
+          <strong>匹配：</strong>"地铁口比较方便"、"上班只要20分钟"、"交通很方便"<br>
+          <strong>应用：</strong>销讲模型 → 交通便利维度
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+  <!-- 长租公寓 vs 房地产开发 -->
+  <div class="section-title">
+    <div class="icon">📊</div>
+    三、长租公寓 vs 房地产开发（模型调改关键差异）
+  </div>
+
+  <div class="alert alert-purple">
+    <span class="alert-icon">⚠️</span>
+    <div>
+      <strong>核心差异：</strong>房地产开发强调"投资价值"和"永久产权"，长租公寓强调"居住体验"和"服务便利"。销讲和挖需模型的关键词库必须相应调整。
+    </div>
+  </div>
+
+  <table class="industry-comparison">
+    <thead>
+      <tr>
+        <th class="dimension">维度</th>
+        <th>房地产开发（原模型）</th>
+        <th>长租公寓（新需求）</th>
+        <th>正则表达式调改示例</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="dimension"><strong>销讲模型：价格说明</strong></td>
+        <td>总价、首付、贷款额、月供</td>
+        <td>月租金、押金、服务费、水电费</td>
+        <td><code>/月租.*?\d+|押[一两]|服务费|水电.*?费/</code></td>
+      </tr>
+      <tr>
+        <td class="dimension"><strong>销讲模型：居住环境</strong></td>
+        <td>学区房、升值潜力、景观视野</td>
+        <td>生活配套、小区安全、邻居素质</td>
+        <td><code>/生活配套|超市便利|小区安全|邻居.*?好/</code></td>
+      </tr>
+      <tr>
+        <td class="dimension"><strong>挖需模型：时间需求</strong></td>
+        <td>交房时间、装修周期</td>
+        <td>入住时间、租期要求、看房时间</td>
+        <td><code>/入住时间|租期.*?\d+月|看房时间|随时看房/</code></td>
+      </tr>
+      <tr>
+        <td class="dimension"><strong>挖需模型：预算信号</strong></td>
+        <td>首付预算、贷款资质</td>
+        <td>租金预算、押金支付能力</td>
+        <td><code>/预算.*?\d+|租金.*?\d+|押金.*?\d+/</code></td>
+      </tr>
+      <tr>
+        <td class="dimension"><strong>挖需模型：决策信号</strong></td>
+        <td>签约意向、付定金、办贷款</td>
+        <td>看多套房、带家人看、询问合同</td>
+        <td><code>/看.*?套房|带家人|问.*?合同|租约.*?内容/</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- 模型调改四步流程 -->
+  <div class="section-title">
+    <div class="icon">🔄</div>
+    四、模型调改四步流程
+  </div>
+
+  <div class="quick-grid">
+    
+    <div class="quick-card">
+      <div class="quick-header">
+        <div class="quick-num">1</div>
+        <div>
+          <h4>识别偏差</h4>
+          <p>在盘客时发现AI分析不准确</p>
+        </div>
+      </div>
+      <div class="action">
+        <strong>标志：</strong>AI判断意向等级与实际成交结果不一致，或关键话术未识别
+      </div>
+    </div>
+
+    <div class="quick-card">
+      <div class="quick-header">
+        <div class="quick-num">2</div>
+        <div>
+          <h4>提取问题</h4>
+          <p>记录实际表达与AI识别差异</p>
+        </div>
+      </div>
+      <div class="action">
+        <strong>方法：</strong>回听录音，对比转写文本与AI识别结果，在上方工具中描述
+      </div>
+    </div>
+
+    <div class="quick-card">
+      <div class="quick-header">
+        <div class="quick-num">3</div>
+        <div>
+          <h4>生成正则</h4>
+          <p>使用工具生成匹配规则</p>
+        </div>
+      </div>
+      <div class="action">
+        <strong>操作：</strong>在上方工具中输入问题描述，系统生成正则表达式建议
+      </div>
+    </div>
+
+    <div class="quick-card">
+      <div class="quick-num">4</div>
+      <div>
+        <h4>验证效果</h4>
+        <p>测试调整后准确性</p>
+      </div>
+      <div class="action">
+        <strong>标准：</strong>同类偏差减少70%+，不引入新误判，销讲执行率提升
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 行动清单 -->
+  <div class="section-title">
+    <div class="icon">📋</div>
+    五、高阶管理者行动清单
+  </div>
+
+  <div class="alert alert-success">
+    <span class="alert-icon">✅</span>
+    <div>
+      <strong>本周立即开始（五个城市同步）：</strong>
+      <ol style="margin:8px 0 0 20px;font-size:13px;">
+        <li>收集销讲模型偏差案例（至少5条，记录实际表达与AI识别差异）</li>
+        <li>收集挖需模型偏差案例（至少5条，意向判断不准的具体表达）</li>
+        <li>使用正则表达式工具生成调整建议，记录预期匹配效果</li>
+        <li>在测试环境验证调改效果，记录改善率（偏差减少百分比）</li>
+        <li>召开五个城市管理者视频会议，分享调改经验和最佳实践</li>
+        <li>建立模型调改案例库，积累长租公寓特定表达关键词</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- 正则表达式速查表 -->
+  <div class="section-title">
+    <div class="icon">📖</div>
+    六、正则表达式语法速查表（长租公寓常用）
+  </div>
+
+  <div style="background:var(--card);border-radius:8px;padding:20px;border:1px solid var(--border);margin-bottom:24px;">
+    <table style="width:100%;font-size:12px;border-collapse:collapse;">
+      <tr>
+        <th style="padding:8px;background:#f5f3ff;text-align:left;">语法</th>
+        <th style="padding:8px;background:#f5f3ff;text-align:left;">说明</th>
+        <th style="padding:8px;background:#f5f3ff;text-align:left;">长租公寓应用示例</th>
+      </tr>
+      <tr>
+        <td style="padding:8px;border-bottom:1px solid var(--border);"><code>.*?</code></td>
+        <td style="padding:8px;border-bottom:1px solid var(--border);">匹配任意字符（非贪婪）</td>
+        <td style="padding:8px;border-bottom:1px solid var(--border);"><code>租期.*?\d+月</code> → 匹配"租期3个月"</td>
+      </tr>
+      <tr>
+        <td style="padding:8px;border-bottom:1px solid var(--border);"><code>(a|b|c)</code></td>
+        <td style="padding:8px;border-bottom:1px solid var(--border);">匹配a或b或c</td>
+        <td style="padding:8px;border-bottom:1px solid var(--border);"><code>(月租|租金|押金)</code> → 匹配租金相关表达</td>
+      </tr>
+      <tr>
+        <td style="padding:8px;border-bottom:1px solid var(--border);"><code>\d+</code></td>
+        <td style="padding:8px;border-bottom:1px solid var(--border);">匹配一个或多个数字</td>
+        <td style="padding:8px;border-bottom:1px solid var(--border);"><code>预算.*?\d+</code> → 匹配"预算5000"</td>
+      </tr>
+      <tr>
+        <td style="padding:8px;border-bottom:1px solid var(--border);"><code>[千万元]</code></td>
+        <td style="padding:8px;border-bottom:1px solid var(--border);">匹配括号内任一字符</td>
+        <td style="padding:8px;border-bottom:1px solid var(--border);"><code>\d+[千万元]</code> → 匹配"5000元"、"5千"</td>
+      </tr>
+      <tr>
+        <td style="padding:8px;border-bottom:1px solid var(--border);"><code>?</code></td>
+        <td style="padding:8px;border-bottom:1px solid var(--border);">匹配0次或1次</td>
+        <td style="padding:8px;border-bottom:1px solid var(--border);"><code>大概?</code> → 匹配"大概"或"大"</td>
+      </tr>
+    </table>
+  </div>
+
+</div>
+
+<script>
+  // 分页切换
+  document.querySelectorAll('.page-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+      // 更新导航状态
+      document.querySelectorAll('.page-tab').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+      
+      // 显示对应页面
+      const pageId = this.getAttribute('data-page');
+      document.querySelectorAll('.page-container').forEach(page => {
+        page.classList.remove('active');
+      });
+      document.getElementById(pageId).classList.add('active');
+    });
+  });
+
+  // 正则表达式生成器（引导式）
+  function generateRegex() {
+    const problem = document.getElementById('problem').value.trim();
+    const actualText = document.getElementById('actual-text').value.trim();
+    const modelType = document.getElementById('model-type').value;
+    
+    if (!problem) {
+      document.getElementById('regex-result').textContent = '请先描述您发现的AI分析偏差';
+      document.getElementById('regex-explain').innerHTML = 
+        '<strong>说明：</strong>请输入具体问题描述，例如"销售在讲租房优势但AI没识别为销讲"。';
+      return;
+    }
+    
+    // 根据问题描述和模型类型生成针对性的正则表达式
+    let regex = '';
+    let explanation = '';
+    let modelName = '';
+    
+    switch(modelType) {
+      case 'sales': 
+        modelName = '销讲模型（执行率）';
+        // 销讲模型常见问题
+        if (problem.includes('价格') || problem.includes('租金') || problem.includes('多少钱')) {
+          regex = '/月租.*?\\d+[元块]?|租金.*?\\d+|押[一两]|服务费|水电.*?费/';
+          explanation = '匹配长租公寓租金相关的表达，包括月租、押金、服务费、水电费等。';
+        } 
+        else if (problem.includes('交通') || problem.includes('地铁') || problem.includes('公交')) {
+          regex = '/(地铁口|交通方便|上班近|通勤.*?\\d+分钟)/';
+          explanation = '匹配交通便利相关的表达，关注租户的通勤时间和出行便利。';
+        }
+        else if (problem.includes('配套') || problem.includes('生活') || problem.includes('便利')) {
+          regex = '/生活配套|超市便利|小区.*?安全|邻居.*?好/';
+          explanation = '匹配居住环境和生活配套相关的表达，强调租住体验。';
+        }
+        else if (problem.includes('户型') || problem.includes('房间') || problem.includes('面积')) {
+          regex = '/一室.*?厅|两室.*?厅|独卫|阳台|面积.*?\\d+平/';
+          explanation = '匹配户型特点和空间描述，适应租房场景而非买房场景。';
+        }
+        else {
+          regex = extractKeywords(actualText || problem);
+          explanation = '根据问题描述生成通用匹配模式。建议进一步细化描述。';
+        }
+        break;
+        
+      case 'need': 
+        modelName = '挖需模型（意向判断）';
+        // 挖需模型常见问题
+        if (problem.includes('时间') || problem.includes('入住') || problem.includes('租期')) {
+          regex = '/入住时间|租期.*?\\d+月|看房时间|随时看房/';
+          explanation = '匹配时间相关的需求表达，关注租期和入住时间。';
+        } 
+        else if (problem.includes('预算') || problem.includes('价格') || problem.includes('承受')) {
+          regex = '/预算.*?\\d+|租金.*?\\d+|押金.*?\\d+/';
+          explanation = '匹配预算和价格承受能力的表达，识别租房决策的预算信号。';
+        }
+        else if (problem.includes('决策') || problem.includes('意向') || problem.includes('签约')) {
+          regex = '/看.*?套房|带家人|问.*?合同|租约.*?内容|比较.*?房子/';
+          explanation = '匹配决策和意向信号，识别租房决策的关键节点。';
+        }
+        else if (problem.includes('需求') || problem.includes('痛点') || problem.includes('问题')) {
+          regex = '/(需要|想要|希望).*?(独卫|阳台|安静|方便)/';
+          explanation = '匹配需求痛点的表达，关注租户的具体居住需求。';
+        }
+        else {
+          regex = extractKeywords(actualText || problem);
+          explanation = '根据问题描述生成通用匹配模式。建议进一步细化描述。';
+        }
+        break;
+    }
+    
+    // 如果没有生成有效的正则表达式，使用通用模式
+    if (!regex) {
+      regex = extractKeywords(actualText || problem);
+      explanation = '根据输入生成通用匹配模式。建议提供更多具体表达。';
+    }
+    
+    document.getElementById('regex-result').textContent = regex;
+    document.getElementById('regex-explain').innerHTML = 
+      `<strong>说明：</strong>${explanation}<br>
+       <strong>应用位置：</strong>${modelName}<br>
+       <strong>操作步骤：</strong>登录AI工牌 → 运营中心 → 模型管理 → 找到对应维度 → 粘贴此正则表达式 → 测试效果`;
+  }
+  
+  // 从文本中提取关键词生成正则表达式
+  function extractKeywords(text) {
+    // 简单的关键词提取逻辑
+    const words = text.split(/[，。,.、\s]+/).map(w => w.trim()).filter(w => w.length >= 2);
+    
+    if (words.length === 0) {
+      return '/.*?/';
+    }
+    
+    // 对中文进行简单处理，提取可能的关键词
+    const keywords = words.filter(word => {
+      // 过滤掉常见虚词
+      const stopWords = ['这是', '应该', '但是', '可是', '因为', '所以', '如果', '那么', '的', '了', '在', '是', '我', '有', '和'];
+      return !stopWords.includes(word) && !/\d+/.test(word) && word.length >= 2;
+    });
+    
+    if (keywords.length === 0) {
+      return '/.*?/';
+    }
+    
+    // 对关键词进行转义，防止正则表达式特殊字符
+    const escapedKeywords = keywords.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    
+    // 构建正则表达式，最多取前5个关键词
+    const selectedKeywords = escapedKeywords.slice(0, 5);
+    return '/(' + selectedKeywords.join('|') + ')/';
+  }
+
+  // 页面加载时初始化
+  document.addEventListener('DOMContentLoaded', function() {
+    // 默认显示第一页
+    document.getElementById('page1').classList.add('active');
+  });
+</script>
+
+
+<!-- 数据更新时间：2026-04-13 00:42:42 -->
+
+<!-- 数据更新时间：2026-04-13 00:42:42 -->
+
+<!-- 数据更新时间：2026-04-13 00:42:42 -->
+</body>
+</html>
