@@ -1,0 +1,51 @@
+{
+  "timestamp": "2026-05-18T12:13:50.888179",
+  "cities": [
+    {
+      "city": "深圳",
+      "visit_count": 40,
+      "pending_count": 10,
+      "linked_count": 30,
+      "link_rate": 75.0,
+      "timestamp": "2026-05-18T12:13:00.860002"
+    },
+    {
+      "city": "北京",
+      "visit_count": 18,
+      "pending_count": 0,
+      "linked_count": 18,
+      "link_rate": 100.0,
+      "timestamp": "2026-05-18T12:13:13.473701"
+    },
+    {
+      "city": "上海",
+      "visit_count": 38,
+      "pending_count": 5,
+      "linked_count": 33,
+      "link_rate": 86.8,
+      "timestamp": "2026-05-18T12:13:26.017357"
+    },
+    {
+      "city": "南京",
+      "visit_count": 71,
+      "pending_count": 12,
+      "linked_count": 59,
+      "link_rate": 83.1,
+      "timestamp": "2026-05-18T12:13:38.634636"
+    },
+    {
+      "city": "成都",
+      "visit_count": 28,
+      "pending_count": 2,
+      "linked_count": 26,
+      "link_rate": 92.9,
+      "timestamp": "2026-05-18T12:13:50.888151"
+    }
+  ],
+  "summary": {
+    "total_visit": 195,
+    "total_pending": 29,
+    "total_linked": 166,
+    "total_rate": 85.1
+  }
+}
