@@ -1,51 +1,51 @@
 {
-  "timestamp": "2026-05-20T00:02:37.265553",
+  "timestamp": "2026-05-22T00:02:36.490303",
   "cities": [
     {
       "city": "深圳",
-      "visit_count": 38,
-      "pending_count": 12,
-      "linked_count": 26,
-      "link_rate": 68.4,
-      "timestamp": "2026-05-20T00:01:47.382851"
+      "visit_count": 40,
+      "pending_count": 13,
+      "linked_count": 27,
+      "link_rate": 67.5,
+      "timestamp": "2026-05-22T00:01:46.034140"
     },
     {
       "city": "北京",
-      "visit_count": 20,
-      "pending_count": 2,
-      "linked_count": 18,
-      "link_rate": 90.0,
-      "timestamp": "2026-05-20T00:02:00.256092"
+      "visit_count": 13,
+      "pending_count": 3,
+      "linked_count": 10,
+      "link_rate": 76.9,
+      "timestamp": "2026-05-22T00:01:58.308384"
     },
     {
       "city": "上海",
-      "visit_count": 36,
-      "pending_count": 4,
-      "linked_count": 32,
-      "link_rate": 88.9,
-      "timestamp": "2026-05-20T00:02:12.453175"
+      "visit_count": 33,
+      "pending_count": 6,
+      "linked_count": 27,
+      "link_rate": 81.8,
+      "timestamp": "2026-05-22T00:02:11.255846"
     },
     {
       "city": "南京",
-      "visit_count": 68,
-      "pending_count": 16,
-      "linked_count": 52,
-      "link_rate": 76.5,
-      "timestamp": "2026-05-20T00:02:25.259945"
+      "visit_count": 69,
+      "pending_count": 21,
+      "linked_count": 48,
+      "link_rate": 69.6,
+      "timestamp": "2026-05-22T00:02:23.913038"
     },
     {
       "city": "成都",
-      "visit_count": 26,
-      "pending_count": 2,
-      "linked_count": 24,
-      "link_rate": 92.3,
-      "timestamp": "2026-05-20T00:02:37.265480"
+      "visit_count": 25,
+      "pending_count": 3,
+      "linked_count": 22,
+      "link_rate": 88.0,
+      "timestamp": "2026-05-22T00:02:36.490271"
     }
   ],
   "summary": {
-    "total_visit": 188,
-    "total_pending": 36,
-    "total_linked": 152,
-    "total_rate": 80.9
+    "total_visit": 180,
+    "total_pending": 46,
+    "total_linked": 134,
+    "total_rate": 74.4
   }
 }
